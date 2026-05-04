@@ -163,18 +163,197 @@
     font-size: 12px;
     color: var(--muted);
   }
+
+  /* --- Login overlay --- */
+  #login-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  body.authed #login-overlay { display: none; }
+  body:not(.authed) header,
+  body:not(.authed) main,
+  body:not(.authed) footer { visibility: hidden; }
+  .login-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.06);
+    padding: 32px;
+    width: 100%;
+    max-width: 360px;
+    display: grid;
+    gap: 12px;
+  }
+  .login-card h1 { font-size: 18px; margin: 0; }
+  .login-card .sub { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  .login-card label {
+    font-size: 13px;
+    color: var(--muted);
+    display: grid;
+    gap: 4px;
+  }
+  .login-card input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font: inherit;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .login-card input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+  .login-card button {
+    margin-top: 4px;
+    padding: 11px;
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    border-radius: var(--radius);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .login-card button:disabled { opacity: .6; cursor: wait; }
+  #login-error { color: #c0392b; font-size: 13px; min-height: 1.2em; }
+
+  /* --- Sign out button --- */
+  #signout {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  #signout:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* --- Notes panel --- */
+  .note-form {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 16px;
+    background: var(--card);
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .note-form input[type=text],
+  .note-form textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font: inherit;
+    background: var(--bg);
+    color: var(--ink);
+    width: 100%;
+  }
+  .note-form textarea {
+    resize: vertical;
+    min-height: 60px;
+    font-family: inherit;
+  }
+  .note-form input:focus,
+  .note-form textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+  .note-form .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .note-form button {
+    padding: 9px 20px;
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    border-radius: var(--radius);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .note-form button:disabled { opacity: .6; cursor: wait; }
+  .notes-list { display: grid; gap: 10px; }
+  .note-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+  .note-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .note-author { font-weight: 600; color: var(--ink); font-size: 14px; }
+  .note-text { white-space: pre-wrap; word-break: break-word; line-height: 1.45; }
+  .note-delete {
+    background: none;
+    border: 0;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    margin-left: 8px;
+  }
+  .note-delete:hover { color: #c0392b; }
+  .notes-empty { color: var(--muted); font-size: 14px; text-align: center; padding: 24px; }
 </style>
 </head>
 <body>
+
+<div id="login-overlay">
+  <form id="login-form" class="login-card">
+    <h1>Staff Login</h1>
+    <div class="sub">David Crymble &amp; Sons admin</div>
+    <label>Email
+      <input type="email" id="login-email" value="info@crymbleandsons.com" autocomplete="username">
+    </label>
+    <label>Password
+      <input type="password" id="login-password" autocomplete="current-password" required autofocus>
+    </label>
+    <button type="submit" id="login-submit">Sign in</button>
+    <div id="login-error" role="alert"></div>
+  </form>
+</div>
+
 <header>
   <div>
     <h1>Admin Dashboard</h1>
     <div class="sub">David Crymble &amp; Sons &middot; staff links</div>
   </div>
   <input type="search" class="search" id="filter" placeholder="Filter links&hellip;" aria-label="Filter links">
+  <button type="button" id="signout">Sign out</button>
 </header>
 
 <main id="board">
+
+  <section data-group id="notes-section">
+    <h2>Team Notes</h2>
+    <form id="note-form" class="note-form">
+      <input type="text" id="note-name" placeholder="Your name" required maxlength="40">
+      <textarea id="note-text" placeholder="Leave a note for the team&hellip;" required maxlength="2000" rows="2"></textarea>
+      <div class="row">
+        <button type="submit" id="note-submit">Save note</button>
+      </div>
+    </form>
+    <div id="notes-list" class="notes-list"><div class="notes-empty">Loading notes&hellip;</div></div>
+  </section>
 
   <section data-group>
     <h2>Crematorium &amp; Death Registration</h2>
@@ -292,6 +471,176 @@
       });
       section.style.display = visible ? '' : 'none';
     });
+  });
+</script>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
+    setPersistence, browserLocalPersistence
+  } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
+  import {
+    getDatabase, ref, push, onValue, query, orderByChild,
+    serverTimestamp, remove
+  } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCvCyWtasqSF-jRBMpAHV93oJj9yYWwYSc",
+    authDomain: "crymble-admin.firebaseapp.com",
+    databaseURL: "https://crymble-admin-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "crymble-admin",
+    storageBucket: "crymble-admin.firebasestorage.app",
+    messagingSenderId: "717102737896",
+    appId: "1:717102737896:web:2a0d1b3f3ea932ba41dc5d",
+    measurementId: "G-T14X9ME2D8"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  const NAME_KEY = 'crymble-admin-author-name';
+
+  await setPersistence(auth, browserLocalPersistence);
+
+  // ---- Login form ----
+  const loginForm = document.getElementById('login-form');
+  const emailInput = document.getElementById('login-email');
+  const pwInput = document.getElementById('login-password');
+  const loginSubmit = document.getElementById('login-submit');
+  const loginError = document.getElementById('login-error');
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginError.textContent = '';
+    loginSubmit.disabled = true;
+    loginSubmit.textContent = 'Signing in…';
+    try {
+      await signInWithEmailAndPassword(auth, emailInput.value.trim(), pwInput.value);
+      pwInput.value = '';
+    } catch (err) {
+      const code = err.code || '';
+      if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
+        loginError.textContent = 'Wrong password';
+      } else if (code.includes('too-many-requests')) {
+        loginError.textContent = 'Too many attempts — try again in a minute';
+      } else if (code.includes('network')) {
+        loginError.textContent = 'No internet connection';
+      } else {
+        loginError.textContent = err.message || 'Sign-in failed';
+      }
+      pwInput.select();
+    } finally {
+      loginSubmit.disabled = false;
+      loginSubmit.textContent = 'Sign in';
+    }
+  });
+
+  // ---- Sign out ----
+  document.getElementById('signout').addEventListener('click', () => signOut(auth));
+
+  // ---- Auth state ----
+  let unsubNotes = null;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.body.classList.add('authed');
+      const savedName = localStorage.getItem(NAME_KEY);
+      if (savedName) document.getElementById('note-name').value = savedName;
+      subscribeNotes();
+    } else {
+      document.body.classList.remove('authed');
+      if (unsubNotes) { unsubNotes(); unsubNotes = null; }
+      pwInput.focus();
+    }
+  });
+
+  // ---- Notes ----
+  const noteForm = document.getElementById('note-form');
+  const noteName = document.getElementById('note-name');
+  const noteText = document.getElementById('note-text');
+  const noteSubmit = document.getElementById('note-submit');
+  const notesList = document.getElementById('notes-list');
+
+  noteForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = noteName.value.trim();
+    const text = noteText.value.trim();
+    if (!name || !text) return;
+    noteSubmit.disabled = true;
+    noteSubmit.textContent = 'Saving…';
+    try {
+      await push(ref(db, 'notes'), {
+        name,
+        text,
+        timestamp: serverTimestamp()
+      });
+      localStorage.setItem(NAME_KEY, name);
+      noteText.value = '';
+      noteText.focus();
+    } catch (err) {
+      alert('Could not save note: ' + (err.message || err));
+    } finally {
+      noteSubmit.disabled = false;
+      noteSubmit.textContent = 'Save note';
+    }
+  });
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function formatTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const now = new Date();
+    const diff = (now - d) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+    const sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function subscribeNotes() {
+    if (unsubNotes) return;
+    const q = query(ref(db, 'notes'), orderByChild('timestamp'));
+    unsubNotes = onValue(q, (snap) => {
+      const items = [];
+      snap.forEach(child => items.push({ id: child.key, ...child.val() }));
+      items.reverse();
+      if (items.length === 0) {
+        notesList.innerHTML = '<div class="notes-empty">No notes yet — add the first one above.</div>';
+        return;
+      }
+      notesList.innerHTML = items.map(n => `
+        <article class="note-card" data-id="${escapeHtml(n.id)}">
+          <div class="note-meta">
+            <span class="note-author">${escapeHtml(n.name || 'Unknown')}</span>
+            <span>
+              <span title="${n.timestamp ? new Date(n.timestamp).toLocaleString() : ''}">${escapeHtml(formatTime(n.timestamp))}</span>
+              <button class="note-delete" type="button" aria-label="Delete note">delete</button>
+            </span>
+          </div>
+          <div class="note-text">${escapeHtml(n.text || '')}</div>
+        </article>
+      `).join('');
+    }, (err) => {
+      notesList.innerHTML = `<div class="notes-empty">Could not load notes: ${escapeHtml(err.message || err)}</div>`;
+    });
+  }
+
+  notesList.addEventListener('click', async (e) => {
+    if (!e.target.classList.contains('note-delete')) return;
+    const card = e.target.closest('.note-card');
+    if (!card) return;
+    if (!confirm('Delete this note?')) return;
+    try {
+      await remove(ref(db, 'notes/' + card.dataset.id));
+    } catch (err) {
+      alert('Could not delete: ' + (err.message || err));
+    }
   });
 </script>
 </body>
